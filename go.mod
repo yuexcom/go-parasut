@@ -1,4 +1,4 @@
-module yuexcom/go-parasut
+module go-parasut
 
 go 1.12
 
