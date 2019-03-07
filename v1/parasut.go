@@ -16,10 +16,9 @@ import (
 )
 
 const (
-	baseURL     = "https://api.parasut.com/v1"
-	authURL     = "https://api.parasut.com/oauth/authorize"
-	tokenURL    = "https://api.parasut.com/oauth/token"
-	callbackURL = "urn:ietf:wg:oauth:2.0:oob"
+	baseURL  = "https://api.parasut.com/v1"
+	authURL  = "https://api.parasut.com/oauth/authorize"
+	tokenURL = "https://api.parasut.com/oauth/token"
 )
 
 // Parasut ...
@@ -29,7 +28,6 @@ type Parasut struct {
 	ClientHTTP   *http.Client
 	BaseURL      string
 	CompanyID    string
-	Token        *oauth2.Token
 }
 
 // New ...
@@ -46,7 +44,7 @@ func New(companyID, clientID, clientSecret string) *Parasut {
 }
 
 // Auth ...
-func (p *Parasut) Auth(username, password string) (string, error) {
+func (p *Parasut) Auth(username, password string) error {
 
 	cfg := oauth2.Config{
 		ClientID:     p.ClientID,
@@ -63,14 +61,12 @@ func (p *Parasut) Auth(username, password string) (string, error) {
 	token, err := cfg.PasswordCredentialsToken(oauth2.NoContext, user, pass)
 
 	if err != nil {
-		return "", err
+		return err
 	}
-
-	p.Token = token
 
 	p.ClientHTTP = cfg.Client(oauth2.NoContext, token)
 
-	return token.AccessToken, nil
+	return nil
 }
 
 func prepareURL(endpoint string, opts interface{}) (string, error) {
