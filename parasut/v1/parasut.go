@@ -101,7 +101,6 @@ func prepareURL(endpoint string, opts interface{}) (string, error) {
 	return u.String(), nil
 }
 
-// NewRequest ...
 func (p *Parasut) newRequest(method, urlStr string, body interface{}) (*http.Request, error) {
 
 	endpoint := fmt.Sprintf("%s/%s", p.BaseURL, urlStr)
@@ -148,7 +147,7 @@ func (p *Parasut) doRequest(req *http.Request, v interface{}) (*http.Response, e
 
 	defer resp.Body.Close()
 
-	err = CheckResponse(resp)
+	err = checkResponse(resp)
 
 	if err != nil {
 		return nil, err
@@ -169,8 +168,7 @@ func (p *Parasut) doRequest(req *http.Request, v interface{}) (*http.Response, e
 	return resp, nil
 }
 
-// CheckResponse ...
-func CheckResponse(resp *http.Response) error {
+func checkResponse(resp *http.Response) error {
 
 	if resp.StatusCode == http.StatusOK {
 		return nil
