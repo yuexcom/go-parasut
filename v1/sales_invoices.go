@@ -1,133 +1,123 @@
 package parasut
 
-import "fmt"
+import (
+	"fmt"
+	"net/http"
+)
 
-// GetSalesInvoices ...
-func (p *Parasut) GetSalesInvoices(opts *ListOptions) (*SalesInvoiceListResponse, error) {
+// SalesInvoicesService ...
+type SalesInvoicesService service
 
-	url, err := prepareURL("sales_invoices", opts)
+// List ...
+func (s *SalesInvoicesService) List(opts *ListOptions) (*SalesInvoiceListResponse, *http.Response, error) {
 
-	if err != nil {
-		return nil, err
-	}
-
-	req, err := p.newRequest("GET", url, nil)
-
-	if err != nil {
-		return nil, err
-	}
-
-	clr := &SalesInvoiceListResponse{}
-
-	_, err = p.doRequest(req, clr)
+	url, err := addOptions("sales_invoices", opts)
 
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
-	return clr, nil
+	req, err := s.client.NewRequest("GET", url, nil)
+
+	if err != nil {
+		return nil, nil, err
+	}
+
+	silr := &SalesInvoiceListResponse{}
+
+	resp, err := s.client.Do(req, silr)
+
+	if err != nil {
+		return nil, nil, err
+	}
+
+	return silr, resp, nil
 }
 
-// GetSalesInvoice ...
-func (p *Parasut) GetSalesInvoice(id int) (*SalesInvoiceResponse, error) {
+// Get ...
+func (s *SalesInvoicesService) Get(id int) (*SalesInvoiceResponse, *http.Response, error) {
 
 	url := fmt.Sprintf("sales_invoices/%d", id)
 
-	req, err := p.newRequest("GET", url, nil)
+	req, err := s.client.NewRequest("GET", url, nil)
 
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
-	cr := &SalesInvoiceResponse{}
+	sir := &SalesInvoiceResponse{}
 
-	_, err = p.doRequest(req, cr)
+	resp, err := s.client.Do(req, sir)
 
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
-	return cr, nil
+	return sir, resp, nil
 }
 
-// CreateSalesInvoice ...
-func (p *Parasut) CreateSalesInvoice(ccr *SalesInvoiceCreateRequest) (*SalesInvoiceResponse, error) {
+// Create ...
+func (s *SalesInvoicesService) Create(ccr *SalesInvoiceCreateRequest) (*SalesInvoiceResponse, *http.Response, error) {
 
-	url, err := prepareURL("sales_invoices", nil)
+	url := "sales_invoices"
 
-	if err != nil {
-		return nil, err
-	}
-
-	req, err := p.newRequest("POST", url, ccr)
+	req, err := s.client.NewRequest("POST", url, ccr)
 
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
-	cr := &SalesInvoiceResponse{}
+	sir := &SalesInvoiceResponse{}
 
-	_, err = p.doRequest(req, cr)
+	resp, err := s.client.Do(req, sir)
 
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
-	return cr, nil
+	return sir, resp, nil
 }
 
-// UpdateSalesInvoice ...
-func (p *Parasut) UpdateSalesInvoice(id int, cur *SalesInvoiceUpdateRequest) (*SalesInvoiceResponse, error) {
+// Update ...
+func (s *SalesInvoicesService) Update(id int, cur *SalesInvoiceUpdateRequest) (*SalesInvoiceResponse, *http.Response, error) {
 
-	endpoint := fmt.Sprintf("sales_invoices/%d", id)
+	url := fmt.Sprintf("sales_invoices/%d", id)
 
-	url, err := prepareURL(endpoint, nil)
-
-	if err != nil {
-		return nil, err
-	}
-
-	req, err := p.newRequest("PUT", url, cur)
+	req, err := s.client.NewRequest("PUT", url, cur)
 
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
-	cr := &SalesInvoiceResponse{}
+	sir := &SalesInvoiceResponse{}
 
-	_, err = p.doRequest(req, cr)
+	resp, err := s.client.Do(req, sir)
 
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
-	return cr, nil
+	return sir, resp, nil
 }
 
-// DeleteSalesInvoice ...
-func (p *Parasut) DeleteSalesInvoice(id int) (*SalesInvoiceDeleteResponse, error) {
+// Delete ...
+func (s *SalesInvoicesService) Delete(id int) (*SalesInvoiceDeleteResponse, *http.Response, error) {
 
-	endpoint := fmt.Sprintf("sales_invoices/%d", id)
+	url := fmt.Sprintf("sales_invoices/%d", id)
 
-	url, err := prepareURL(endpoint, nil)
-
-	if err != nil {
-		return nil, err
-	}
-
-	req, err := p.newRequest("DELETE", url, nil)
+	req, err := s.client.NewRequest("DELETE", url, nil)
 
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
-	cdr := &SalesInvoiceDeleteResponse{}
+	sidr := &SalesInvoiceDeleteResponse{}
 
-	_, err = p.doRequest(req, cdr)
+	resp, err := s.client.Do(req, sidr)
 
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
-	return cdr, nil
+	return sidr, resp, nil
 }

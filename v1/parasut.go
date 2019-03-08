@@ -16,39 +16,34 @@ import (
 )
 
 const (
-	baseURL  = "https://api.parasut.com/v1"
-	authURL  = "https://api.parasut.com/oauth/authorize"
 	tokenURL = "https://api.parasut.com/oauth/token"
+	authURL  = "https://api.parasut.com/oauth/authorize"
+	baseURL  = "https://api.parasut.com/v1"
 )
 
-// Parasut ...
-type Parasut struct {
-	ClientID     string
-	ClientSecret string
-	ClientHTTP   *http.Client
-	BaseURL      string
-	CompanyID    string
+type service struct {
+	client *Client
 }
 
-// New ...
-func New(companyID, clientID, clientSecret string) *Parasut {
+// Client ...
+type Client struct {
+	client  *http.Client
+	baseURL *url.URL
 
-	baseURL := fmt.Sprintf("%s/%s", baseURL, companyID)
+	common service
 
-	return &Parasut{
-		ClientID:     clientID,
-		ClientSecret: clientSecret,
-		BaseURL:      baseURL,
-		CompanyID:    companyID,
-	}
+	Contacts      *ContactsService
+	SalesInvoices *SalesInvoicesService
+
+	companyID string
 }
 
-// Auth ...
-func (p *Parasut) Auth(username, password string) error {
+// GetAuthHTTPClient ...
+func GetAuthHTTPClient(clientID, clientSecret, username, password string) (*http.Client, error) {
 
 	cfg := oauth2.Config{
-		ClientID:     p.ClientID,
-		ClientSecret: p.ClientSecret,
+		ClientID:     clientID,
+		ClientSecret: clientSecret,
 		Endpoint: oauth2.Endpoint{
 			AuthURL:  authURL,
 			TokenURL: tokenURL,
@@ -61,35 +56,58 @@ func (p *Parasut) Auth(username, password string) error {
 	token, err := cfg.PasswordCredentialsToken(oauth2.NoContext, user, pass)
 
 	if err != nil {
-		return err
+		return nil, err
 	}
 
-	p.ClientHTTP = cfg.Client(oauth2.NoContext, token)
-
-	return nil
+	return cfg.Client(oauth2.NoContext, token), nil
 }
 
-func prepareURL(endpoint string, opts interface{}) (string, error) {
+// NewClient ...
+func NewClient(httpClient *http.Client, companyID string) (*Client, error) {
 
-	optsValue := reflect.ValueOf(opts)
-
-	// pointer değilse ve pointer dolu değilse direkt aynı şekilde geri gönder
-	if optsValue.Kind() == reflect.Ptr && optsValue.IsNil() {
-		return endpoint, nil
+	if httpClient == nil {
+		httpClient = http.DefaultClient
 	}
 
-	// endpoint string'ini url struct'ına dönüştür
-	u, err := url.Parse(endpoint)
+	companyBaseURL, err := url.Parse(fmt.Sprintf("%s/%s", baseURL, companyID))
 
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 
-	// struct değerlerini query srting'e dönüştür
-	qs, err := query.Values(opts)
+	c := &Client{
+		client:  httpClient,
+		baseURL: companyBaseURL,
+	}
+
+	c.common.client = c
+
+	c.Contacts = (*ContactsService)(&c.common)
+	c.SalesInvoices = (*SalesInvoicesService)(&c.common)
+
+	c.companyID = companyID
+
+	return c, nil
+}
+
+func addOptions(s string, opt interface{}) (string, error) {
+
+	v := reflect.ValueOf(opt)
+
+	if v.Kind() == reflect.Ptr && v.IsNil() {
+		return s, nil
+	}
+
+	u, err := url.Parse(s)
 
 	if err != nil {
-		return "", err
+		return s, err
+	}
+
+	qs, err := query.Values(opt)
+
+	if err != nil {
+		return s, err
 	}
 
 	u.RawQuery = qs.Encode()
@@ -97,9 +115,10 @@ func prepareURL(endpoint string, opts interface{}) (string, error) {
 	return u.String(), nil
 }
 
-func (p *Parasut) newRequest(method, urlStr string, body interface{}) (*http.Request, error) {
+// NewRequest ...
+func (c *Client) NewRequest(method, urlStr string, body interface{}) (*http.Request, error) {
 
-	endpoint := fmt.Sprintf("%s/%s", p.BaseURL, urlStr)
+	endpoint := fmt.Sprintf("%s/%s", c.baseURL.String(), urlStr)
 
 	// baseUrl'ye endpoint ekleniyor
 	u, err := url.Parse(endpoint)
@@ -133,9 +152,10 @@ func (p *Parasut) newRequest(method, urlStr string, body interface{}) (*http.Req
 	return req, nil
 }
 
-func (p *Parasut) doRequest(req *http.Request, v interface{}) (*http.Response, error) {
+// Do ...
+func (c *Client) Do(req *http.Request, v interface{}) (*http.Response, error) {
 
-	resp, err := p.ClientHTTP.Do(req)
+	resp, err := c.client.Do(req)
 
 	if err != nil {
 		return nil, err

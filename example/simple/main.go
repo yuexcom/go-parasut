@@ -6,19 +6,35 @@ import (
 	"github.com/yuexcom/go-parasut/v1"
 )
 
+const (
+	clientID     = "CLIENT_ID"
+	clientSecret = "CLIENT_SECRET"
+	username     = "USERNAME"
+	password     = "PASSWORD"
+	companyID    = "COMPANY_ID"
+)
+
 func main() {
 
-	prst := parasut.New("COMPANY_ID", "CLIENT_ID", "CLIENT_SECRET")
-
-	err := prst.Auth("username", "password")
+	httpClient, err := parasut.GetAuthHTTPClient(clientID, clientSecret, username, password)
 
 	if err != nil {
 		panic(err)
 	}
 
-	contactList, err := prst.GetContacts(&parasut.ListOptions{
+	client, err := parasut.NewClient(httpClient, companyID)
+
+	if err != nil {
+		panic(err)
+	}
+
+	contacts, _, err := client.Contacts.List(&parasut.ListOptions{
 		TaxNumber: "1234567890",
 	})
 
-	fmt.Printf("%+v", contactList)
+	if err != nil {
+		panic(err)
+	}
+
+	fmt.Printf("%+v", contacts)
 }

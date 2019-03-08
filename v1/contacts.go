@@ -1,133 +1,122 @@
 package parasut
 
-import "fmt"
+import (
+	"fmt"
+	"net/http"
+)
 
-// GetContacts ...
-func (p *Parasut) GetContacts(opts *ListOptions) (*ContactListResponse, error) {
+// ContactsService ...
+type ContactsService service
 
-	url, err := prepareURL("contacts", opts)
+// List ...
+func (s *ContactsService) List(opts *ListOptions) (*ContactListResponse, *http.Response, error) {
+
+	url, err := addOptions("contacts", opts)
 
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
-	req, err := p.newRequest("GET", url, nil)
-
+	req, err := s.client.NewRequest("GET", url, nil)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
 	clr := &ContactListResponse{}
 
-	_, err = p.doRequest(req, clr)
+	resp, err := s.client.Do(req, &clr)
 
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
-	return clr, nil
+	return clr, resp, nil
 }
 
-// GetContact ...
-func (p *Parasut) GetContact(id int) (*ContactResponse, error) {
+// Get ...
+func (s *ContactsService) Get(id int) (*ContactResponse, *http.Response, error) {
 
 	url := fmt.Sprintf("contacts/%d", id)
 
-	req, err := p.newRequest("GET", url, nil)
+	req, err := s.client.NewRequest("GET", url, nil)
 
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
 	cr := &ContactResponse{}
 
-	_, err = p.doRequest(req, cr)
+	resp, err := s.client.Do(req, cr)
 
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
-	return cr, nil
+	return cr, resp, nil
 }
 
-// CreateContact ...
-func (p *Parasut) CreateContact(ccr *ContactCreateRequest) (*ContactResponse, error) {
+// Create ...
+func (s *ContactsService) Create(ccr *ContactCreateRequest) (*ContactResponse, *http.Response, error) {
 
-	url, err := prepareURL("contacts", nil)
+	url := "contacts"
 
-	if err != nil {
-		return nil, err
-	}
-
-	req, err := p.newRequest("POST", url, ccr)
+	req, err := s.client.NewRequest("POST", url, ccr)
 
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
 	cr := &ContactResponse{}
 
-	_, err = p.doRequest(req, cr)
+	resp, err := s.client.Do(req, cr)
 
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
-	return cr, nil
+	return cr, resp, nil
 }
 
-// UpdateContact ...
-func (p *Parasut) UpdateContact(id int, cur *ContactUpdateRequest) (*ContactResponse, error) {
+// Update ...
+func (s *ContactsService) Update(id int, cur *ContactUpdateRequest) (*ContactResponse, *http.Response, error) {
 
-	endpoint := fmt.Sprintf("contacts/%d", id)
+	url := fmt.Sprintf("contacts/%d", id)
 
-	url, err := prepareURL(endpoint, nil)
-
-	if err != nil {
-		return nil, err
-	}
-
-	req, err := p.newRequest("PUT", url, cur)
+	req, err := s.client.NewRequest("PUT", url, cur)
 
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
 	cr := &ContactResponse{}
 
-	_, err = p.doRequest(req, cr)
+	resp, err := s.client.Do(req, cr)
 
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
-	return cr, nil
+	return cr, resp, nil
 }
 
-// DeleteContact ...
-func (p *Parasut) DeleteContact(id int) (*ContactDeleteResponse, error) {
+// Delete ...
+func (s *ContactsService) Delete(id int) (*ContactDeleteResponse, *http.Response, error) {
 
-	endpoint := fmt.Sprintf("contacts/%d", id)
+	url := fmt.Sprintf("contacts/%d", id)
 
-	url, err := prepareURL(endpoint, nil)
-
-	if err != nil {
-		return nil, err
-	}
-
-	req, err := p.newRequest("DELETE", url, nil)
+	req, err := s.client.NewRequest("DELETE", url, nil)
 
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
 	cdr := &ContactDeleteResponse{}
 
-	_, err = p.doRequest(req, cdr)
+	resp, err := s.client.Do(req, cdr)
 
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
-	return cdr, nil
+	return cdr, resp, nil
 }
