@@ -1,5 +1,10 @@
 package parasut
 
+import (
+	"fmt"
+	"net/http"
+)
+
 // --------------------------------
 // ----- SALES INVOICE MODELS -----
 // --------------------------------
@@ -48,8 +53,8 @@ type SalesInvoice struct {
 	ShipmentAddress        string  `json:"shipment_address"`
 }
 
-// SalesInvoiceIndexRequest ...
-type SalesInvoiceIndexRequest struct {
+// SalesInvoiceListOptions ...
+type SalesInvoiceListOptions struct {
 	Filter  map[string]interface{} `json:"filter"`
 	Sort    string                 `json:"sort"`
 	Page    map[string]int         `json:"page"`
@@ -71,8 +76,8 @@ type SalesInvoiceCreateRequest struct {
 	} `json:"data"`
 }
 
-// SalesInvoiceEditRequest ...
-type SalesInvoiceEditRequest struct {
+// SalesInvoiceUpdateRequest ...
+type SalesInvoiceUpdateRequest struct {
 	Data struct {
 		ID            string       `json:"id"`
 		Type          string       `json:"type"`
@@ -89,6 +94,27 @@ type SalesInvoiceEditRequest struct {
 // SalesInvoiceShowRequest ...
 type SalesInvoiceShowRequest struct {
 	Include string `json:"include"`
+}
+
+// SalesInvoicesResponse ...
+type SalesInvoicesResponse struct {
+	Data []struct {
+		ID            string       `json:"id"`
+		Type          string       `json:"type"`
+		Attributes    SalesInvoice `json:"attributes"`
+		Relationships struct {
+			Category        Relationship  `json:"scategory"`
+			Contact         Relationship  `json:"contact"`
+			Details         Relationships `json:"details"`
+			Payments        Relationships `json:"payments"`
+			Tags            Relationships `json:"tags"`
+			Sharings        Relationships `json:"sharings"`
+			RecurrencePlan  Relationship  `json:"recurrence_plan"`
+			ActiveEDocument Relationship  `json:"active_e_document"`
+		} `json:"relationships"`
+	} `json:"data"`
+	Included []Included `json:"included"`
+	Meta     Meta       `json:"meta"`
 }
 
 // SalesInvoiceResponse ...
@@ -139,7 +165,7 @@ type Contact struct {
 	Phone                     string   `json:"phone"`
 	Fax                       string   `json:"fax"`
 	IsAbroad                  bool     `json:"is_abroad"`
-	TermDays                  string   `json:"term_days"`
+	TermDays                  int      `json:"term_days"`
 	InvoicingPreferences      struct{} `json:"invoicing_preferences"`
 	SharingsCount             int      `json:"sharings_count"`
 	IBANS                     []string `json:"ibans"`
@@ -149,12 +175,103 @@ type Contact struct {
 	PaymentReminderPreviewURL string   `json:"payment_reminder_preview_url"`
 }
 
-// ContactIndexRequest ...
-type ContactIndexRequest struct {
-	Filter  map[string]string `json:"filter"`
-	Sort    string            `json:"sort"`
-	Page    map[string]int    `json:"page"`
-	Include string            `json:"include"`
+// ContactPeople ...
+type ContactPeople struct {
+	Name  string `json:"name"`
+	Email string `json:"email"`
+	Phone string `json:"phone"`
+	Notes string `json:"notes"`
+}
+
+// Category ...
+type Category struct {
+	FullPath     string
+	CreatedAt    string
+	UpdatedAt    string
+	Name         string
+	BgColor      string
+	TextColor    string
+	CategoryType string
+	ParentID     int
+}
+
+// CategoryData ...
+type CategoryData struct {
+	ID            string `json:"id"`
+	Type          string `json:"type"`
+	Attributes    Category
+	Relationships struct {
+		ParentCategory struct {
+			Data ParentCategoryData
+		}
+		Subcategories []struct {
+			Data SubcategoryData
+		}
+	}
+}
+
+// ParentCategoryData ...
+type ParentCategoryData struct {
+	ID   string `json:"id"`
+	Type string `json:"type"`
+}
+
+// SubcategoryData ...
+type SubcategoryData struct {
+	ID   string `json:"id"`
+	Type string `json:"type"`
+}
+
+// ContactData ...
+type ContactData struct {
+	ID            string  `json:"id"`
+	Type          string  `json:"type"`
+	Attributes    Contact `json:"attributes"`
+	Relationships struct {
+		Category struct {
+			Data CategoryData
+		}
+		ContactPortal struct {
+			Data ContactPortalData
+		}
+		ContactPeople struct {
+			Data []ContactPeopleData
+		}
+	} `json:"relationships"`
+	Meta DataMeta `json:"meta"`
+}
+
+// ContactPeopleData ...
+type ContactPeopleData struct {
+	ID         string `json:"id"`
+	Type       string `json:"type"`
+	Attributes ContactPeople
+}
+
+// ContactPortalData ...
+type ContactPortalData struct{}
+
+// ContactListOptions ...
+type ContactListOptions struct {
+	Filter  FilterOptions `url:"filter,omitempty"`
+	Sort    string        `url:"sort,omitempty"`
+	Page    PageOptions   `url:"page,omitempty"`
+	Include string        `url:"include,omitempty"`
+}
+
+// FilterOptions ...
+type FilterOptions struct {
+	Name      string `url:"name,omitempty"`
+	Email     string `url:"email,omitempty"`
+	TaxNumber string `url:"tax_number,omitempty"`
+	TaxOffice string `url:"tax_office,omitempty"`
+	City      string `url:"city,omitempty"`
+}
+
+// PageOptions ...
+type PageOptions struct {
+	Number int `url:"number,omitempty"`
+	Size   int `url:"size,omitempty"`
 }
 
 // ContactCreateRequest ...
@@ -164,23 +281,25 @@ type ContactCreateRequest struct {
 		Type          string  `json:"type"`
 		Attributes    Contact `json:"attributes"`
 		Relationships struct {
-			Category Relationship  `json:"category"`
-			Contact  Relationship  `json:"contact"`
-			Details  Relationships `json:"details"`
-			Tags     Relationships `json:"tags"`
+			Category      CategoryData    `json:"category"`
+			ContactPeople []ContactPeople `json:"contact_people"`
 		} `json:"relationships"`
 	} `json:"data"`
 }
 
-// ContactEditRequest ...
-type ContactEditRequest struct {
+// ContactUpdateRequest ...
+type ContactUpdateRequest struct {
 	Data struct {
 		ID            string  `json:"id"`
 		Type          string  `json:"type"`
 		Attributes    Contact `json:"attributes"`
 		Relationships struct {
-			Category      Relationship  `json:"category"`
-			ContactPeople Relationships `json:"contact_people"`
+			Category struct {
+				Data CategoryData
+			}
+			ContactPeople struct {
+				Data []ContactPeopleData
+			}
 		} `json:"relationships"`
 	} `json:"data"`
 }
@@ -200,23 +319,19 @@ type ContactShowRequest struct {
 	Included []Included `json:"included"`
 }
 
+// ContactsResponse ...
+type ContactsResponse struct {
+	Data     []ContactData `json:"data"`
+	Included []Included    `json:"included"`
+	Links    struct{}      `json:"links"`
+	Meta     Meta          `json:"meta"`
+}
+
 // ContactResponse ...
 type ContactResponse struct {
-	Data []struct {
-		ID            string  `json:"id"`
-		Type          string  `json:"type"`
-		Attributes    Contact `json:"attributes"`
-		Relationships struct {
-			Category        Relationship  `json:"category"`
-			ContactPortal   Relationship  `json:"contact_portal"`
-			ContactPeople   Relationships `json:"contact_people"`
-			PriceList       Relationship  `json:"price_list"`
-			Activities      Relationships `json:"activities"`
-			EInvoiceInboxes Relationships `json:"e_invoice_inboxes"`
-			Sharings        Relationships `json:"sharings"`
-		} `json:"relationships"`
-	} `json:"data"`
-	Meta Meta `json:"meta"`
+	Data     ContactData `json:"data"`
+	Included []Included  `json:"included"`
+	Meta     Meta        `json:"meta"`
 }
 
 // -------------------------
@@ -225,10 +340,21 @@ type ContactResponse struct {
 
 // Included ...
 type Included struct {
-	ID            string   `json:"id"`
-	Type          string   `json:"type"`
-	Attributes    struct{} `json:"attributes"`
-	Relationships struct{} `json:"relationships"`
+	ID            string           `json:"id"`
+	Type          string           `json:"type"`
+	Attributes    interface{}      `json:"attributes"`
+	Relationships RelationshipList `json:"relationships"`
+}
+
+// RelationshipList ...
+type RelationshipList struct {
+	Category        Relationship  `json:"category"`
+	ContactPortal   Relationship  `json:"contact_portal"`
+	ContactPeople   Relationships `json:"contact_people"`
+	PriceList       Relationship  `json:"price_list"`
+	Activities      Relationships `json:"activities"`
+	EInvoiceInboxes Relationships `json:"e_invoice_inboxes"`
+	Sharings        Relationships `json:"sharings"`
 }
 
 // Relationship ...
@@ -249,7 +375,66 @@ type Relationships struct {
 
 // Meta ...
 type Meta struct {
-	CurrentPage int `json:"current_page"`
-	TotalPages  int `json:"total_pages"`
-	TotalCount  int `json:"total_count"`
+	CurrentPage      int    `json:"current_page"`
+	TotalPages       int    `json:"total_pages"`
+	TotalCount       int    `json:"total_count"`
+	PerPage          int    `json:"per_page"`
+	PayableTotal     string `json:"payable_total"`
+	CollectibleTotal string `json:"collectible_total"`
+	ExportURL        string `json:"export_url"`
+}
+
+// DataMeta ...
+type DataMeta struct {
+	CreatedAt string `json:"created_at"`
+	UpdatedAt string `json:"updated_at"`
+}
+
+// ResponseError wrapper
+type ResponseError struct {
+	Response       *http.Response
+	Errors         []string `json:"errors,omitempty"`
+	Base           []string `json:"base,omitempty"`
+	SalesInvoiceID string   `json:"sales_invoice_id,omitempty"`
+	Type           string   `json:"type,omitempty"`
+	Status         string   `json:"status,omitempty"`
+	PDF            string   `json:"pdf,omitempty"`
+}
+
+func (r *ResponseError) Error() string {
+	if len(r.Base) > 0 {
+		return fmt.Sprintf("%+v", r.Base)
+	}
+	return fmt.Sprintf("%+v", r.Errors)
+}
+
+// CommonResponseError ...
+type CommonResponseError struct {
+	Errors []string `json:"errors"`
+}
+
+func (r *CommonResponseError) Error() string {
+	return fmt.Sprintf("%+v", r.Errors)
+}
+
+// BaseResponseError ...
+type BaseResponseError struct {
+	Base []string `json:"base"`
+}
+
+func (r *BaseResponseError) Error() string {
+	return fmt.Sprintf("%+v", r.Base)
+}
+
+// EDocumentStatusResponseError ...
+type EDocumentStatusResponseError struct {
+	SalesInvoiceID string   `json:"sales_invoice_id,omitempty"`
+	Type           string   `json:"type,omitempty"`
+	Status         string   `json:"status,omitempty"`
+	Errors         []string `json:"errors,omitempty"`
+	PDF            string   `json:"pdf,omitempty"`
+}
+
+func (r *EDocumentStatusResponseError) Error() string {
+	return fmt.Sprintf("%+v [Fatura: #%s]", r.Errors, r.SalesInvoiceID)
 }
