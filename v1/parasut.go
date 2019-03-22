@@ -25,7 +25,7 @@ type service struct {
 	client *Client
 }
 
-// Client ...
+// Client yeni bir paraşüt client'ı oluşturur
 type Client struct {
 	client  *http.Client
 	baseURL *url.URL
@@ -38,7 +38,7 @@ type Client struct {
 	companyID string
 }
 
-// GetAuthHTTPClient ...
+// GetAuthHTTPClient bir http client'ı auth edip get eder
 func GetAuthHTTPClient(clientID, clientSecret, username, password string) (*http.Client, error) {
 
 	cfg := oauth2.Config{

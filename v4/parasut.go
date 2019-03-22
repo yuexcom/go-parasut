@@ -190,13 +190,13 @@ func (c *Client) Do(req *http.Request, v interface{}) (*http.Response, error) {
 
 func checkResponse(resp *http.Response) error {
 
-	if resp.StatusCode == http.StatusOK {
+	if resp.StatusCode >= 200 && resp.StatusCode <= 299 {
 		return nil
 	}
 
-	data, err := ioutil.ReadAll(resp.Body)
-
 	errorResponse := &ResponseError{}
+
+	data, err := ioutil.ReadAll(resp.Body)
 
 	if err == nil && data != nil {
 		json.Unmarshal(data, errorResponse)

@@ -71,9 +71,9 @@ type SalesInvoiceRequest struct {
 	Description       string             `json:"description,omitempty"`
 	InvoiceID         int                `json:"invoice_id,omitempty"`
 	InvoiceSeries     string             `json:"invoice_series,omitempty"`
-	ItemType          string             `json:"item_type,omitempty"`
-	IssueDate         string             `json:"issue_date,omitempty"`
-	DueDate           string             `json:"due_date,omitempty"`
+	ItemType          string             `json:"item_type,omitempty"`  // invoice (fatura), estimate (proforma)
+	IssueDate         string             `json:"issue_date,omitempty"` // YYYY-MM-DD
+	DueDate           string             `json:"due_date,omitempty"`   // YYYY-MM-DD
 	CategoryID        int                `json:"category_id,omitempty"`
 	ContactID         int                `json:"contact_id,omitempty"`
 	BillingAddress    string             `json:"billing_address,omitempty"`
@@ -91,9 +91,9 @@ type DetailsAttribute struct {
 	Quantity              float64 `json:"quantity,omitempty"`
 	UnitPrice             float64 `json:"unit_price,omitempty"`
 	VatRate               float64 `json:"vat_rate,omitempty"`
-	DiscountType          string  `json:"discount_type,omitempty"`
+	DiscountType          string  `json:"discount_type,omitempty"` // amount
 	DiscountValue         float64 `json:"discount_value,omitempty"`
-	ExciseDutyType        string  `json:"excise_duty_type,omitempty"`
+	ExciseDutyType        string  `json:"excise_duty_type,omitempty"` // percentage
 	ExciseDutyValue       float64 `json:"excise_duty_value,omitempty"`
 	CommunicationsTaxRate float64 `json:"communications_tax_rate,omitempty"`
 }
@@ -193,7 +193,7 @@ type ContactUpdateRequest struct {
 // ContactRequest ...
 type ContactRequest struct {
 	Name                    string          `json:"name,omitempty"`
-	ContactType             string          `json:"contact_type,omitempty"`
+	ContactType             string          `json:"contact_type,omitempty"` // company, person
 	Email                   string          `json:"emails,omitempty"`
 	TaxNumber               string          `json:"tax_number,omitempty"`
 	TaxOffice               string          `json:"tax_office,omitempty"`
