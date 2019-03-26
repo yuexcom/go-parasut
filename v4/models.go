@@ -13,8 +13,8 @@ type PageOptions struct {
 
 // Included ...
 type Included struct {
-	ID            string           `json:"id,omitempty"`
-	Type          string           `json:"type,omitempty"`
+	ID            string           `json:"id"`
+	Type          string           `json:"type"`
 	Attributes    interface{}      `json:"attributes"`
 	Relationships RelationshipList `json:"relationships"`
 }
@@ -30,21 +30,21 @@ type RelationshipList struct {
 	Sharings        Relationships `json:"sharings"`
 }
 
-// Relationship ...
-type Relationship struct {
-	Data RelationshipData `json:"data"`
-}
+// // Relationship ...
+// type Relationship struct {
+// 	Data RelationshipData `json:"data"`
+// }
 
-// Relationships ...
-type Relationships struct {
-	Data []RelationshipData `json:"data"`
-}
+// // Relationships ...
+// type Relationships struct {
+// 	Data []RelationshipData `json:"data"`
+// }
 
-// RelationshipData ...
-type RelationshipData struct {
-	ID   string `json:"id,omitempty"`
-	Type string `json:"type,omitempty"`
-}
+// // RelationshipData ...
+// type RelationshipData struct {
+// 	ID   string `json:"id"`
+// 	Type string `json:"type"`
+// }
 
 // Meta ...
 type Meta struct {
@@ -66,12 +66,18 @@ type DataMeta struct {
 // ResponseError wrapper
 type ResponseError struct {
 	Response       *http.Response
-	Errors         []string `json:"errors,omitempty"`
-	Base           []string `json:"base,omitempty"`
-	SalesInvoiceID string   `json:"sales_invoice_id,omitempty"`
-	Type           string   `json:"type,omitempty"`
-	Status         string   `json:"status,omitempty"`
-	PDF            string   `json:"pdf,omitempty"`
+	Errors         []Error  `json:"errors"`
+	Base           []string `json:"base"`
+	SalesInvoiceID string   `json:"sales_invoice_id"`
+	Type           string   `json:"type"`
+	Status         string   `json:"status"`
+	PDF            string   `json:"pdf"`
+}
+
+// Error ...
+type Error struct {
+	Title  string `json:"title"`
+	Detail string `json:"detail"`
 }
 
 func (r *ResponseError) Error() string {
@@ -83,7 +89,7 @@ func (r *ResponseError) Error() string {
 
 // CommonResponseError ...
 type CommonResponseError struct {
-	Errors []string `json:"errors"`
+	Errors []Error `json:"errors"`
 }
 
 func (r *CommonResponseError) Error() string {
@@ -101,11 +107,11 @@ func (r *BaseResponseError) Error() string {
 
 // EDocumentStatusResponseError ...
 type EDocumentStatusResponseError struct {
-	SalesInvoiceID string   `json:"sales_invoice_id,omitempty"`
-	Type           string   `json:"type,omitempty"`
-	Status         string   `json:"status,omitempty"`
-	Errors         []string `json:"errors,omitempty"`
-	PDF            string   `json:"pdf,omitempty"`
+	SalesInvoiceID string  `json:"sales_invoice_id"`
+	Type           string  `json:"type"`
+	Status         string  `json:"status"`
+	Errors         []Error `json:"errors"`
+	PDF            string  `json:"pdf"`
 }
 
 func (r *EDocumentStatusResponseError) Error() string {

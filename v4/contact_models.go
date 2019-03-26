@@ -1,138 +1,83 @@
 package parasut
 
-// Contact ...
-type Contact struct {
-	CreatedAt                 string   `json:"created_at,omitempty"`
-	UpdatedAt                 string   `json:"updated_at,omitempty"`
-	ContactType               string   `json:"contact_type,omitempty"`
-	Name                      string   `json:"name,omitempty"`
-	Email                     string   `json:"email,omitempty"`
-	ShortName                 string   `json:"short_name,omitempty"`
-	Balance                   string   `json:"balance,omitempty"`
-	TRLBalance                string   `json:"trl_balance,omitempty"`
-	USDBalance                string   `json:"usd_balance,omitempty"`
-	EURBalance                string   `json:"eur_balance,omitempty"`
-	GBPBalance                string   `json:"gbp_balance,omitempty"`
-	TaxNumber                 string   `json:"tax_number,omitempty"`
-	TaxOffice                 string   `json:"tax_office,omitempty"`
-	Archived                  bool     `json:"archived,omitempty"`
-	AccountType               string   `json:"account_type,omitempty"`
-	City                      string   `json:"city,omitempty"`
-	District                  string   `json:"district,omitempty"`
-	Address                   string   `json:"address,omitempty"`
-	Phone                     string   `json:"phone,omitempty"`
-	Fax                       string   `json:"fax,omitempty"`
-	IsAbroad                  bool     `json:"is_abroad,omitempty"`
-	TermDays                  int      `json:"term_days,omitempty"`
-	SharingsCount             int      `json:"sharings_count,omitempty"`
-	IBANS                     []string `json:"ibans,omitempty"`
-	ExchangeRateType          string   `json:"exchange_rate_type,omitempty"`
-	IBAN                      string   `json:"iban,omitempty"`
-	SharingPreviewURL         string   `json:"sharing_preview_url,omitempty"`
-	PaymentReminderPreviewURL string   `json:"payment_reminder_preview_url,omitempty"`
-	// InvoicingPreferences      *struct{} `json:"invoicing_preferences"`
-}
-
-// ContactPeople ...
-type ContactPeople struct {
-	Name  string `json:"name,omitempty"`
-	Email string `json:"email,omitempty"`
-	Phone string `json:"phone,omitempty"`
-	Notes string `json:"notes,omitempty"`
-}
-
-// Category ...
-type Category struct {
-	FullPath     string `json:"full_path,omitempty"`
-	CreatedAt    string `json:"created_at,omitempty"`
-	UpdatedAt    string `json:"updated_at,omitempty"`
-	Name         string `json:"name,omitempty"`
-	BgColor      string `json:"bg_color,omitempty"`
-	TextColor    string `json:"text_color,omitempty"`
-	CategoryType string `json:"category_type,omitempty"`
-	ParentID     int    `json:"parent_id,omitempty"`
-}
-
-// CategoryData ...
-type CategoryData struct {
-	ID            string   `json:"id,omitempty"`
-	Type          string   `json:"type,omitempty"`
-	Attributes    Category `json:"attributes,omitempty"`
-	Relationships *struct {
-		ParentCategory ParentCategoryRelationship `json:"parent_category,omitempty"`
-		Subcategories  SubcategoryRelationship    `json:"subcategories,omitempty"`
-	} `json:"relationships,omitempty"`
-}
-
-// ParentCategoryData ...
-type ParentCategoryData struct {
-	ID   string `json:"id,omitempty"`
-	Type string `json:"type,omitempty"`
-}
-
-// SubcategoryData ...
-type SubcategoryData struct {
-	ID   string `json:"id,omitempty"`
-	Type string `json:"type,omitempty"`
-}
-
 // ContactData ...
 type ContactData struct {
-	ID            string  `json:"id,omitempty"`
-	Type          string  `json:"type,omitempty"`
-	Attributes    Contact `json:"attributes,omitempty"`
-	Relationships *struct {
-		Category      *CategoryRelationship      `json:"category,omitempty"`
-		ContactPeople *ContactPeopleRelationship `json:"contact_people,omitempty"`
-		ContactPortal *ContactPortalRelationship `json:"contact_portal,omitempty"`
-	} `json:"relationships,omitempty"`
+	ID            string         `json:"id"`
+	Type          string         `json:"type"`
+	Attributes    *Contact       `json:"attributes"`
+	Relationships *Relationships `json:"relationships"`
 }
 
-// ContactPeopleData ...
-type ContactPeopleData struct {
-	ID         string        `json:"id,omitempty"`
-	Type       string        `json:"type,omitempty"`
-	Attributes ContactPeople `json:"attributes,omitempty"`
+// Contact ...
+type Contact struct {
+	CreatedAt                 string   `json:"created_at"`
+	UpdatedAt                 string   `json:"updated_at"`
+	ContactType               string   `json:"contact_type"`
+	Name                      string   `json:"name"`
+	Email                     string   `json:"email"`
+	ShortName                 string   `json:"short_name"`
+	Balance                   string   `json:"balance"`
+	TRLBalance                string   `json:"trl_balance"`
+	USDBalance                string   `json:"usd_balance"`
+	EURBalance                string   `json:"eur_balance"`
+	GBPBalance                string   `json:"gbp_balance"`
+	TaxNumber                 string   `json:"tax_number"`
+	TaxOffice                 string   `json:"tax_office"`
+	Archived                  bool     `json:"archived"`
+	AccountType               string   `json:"account_type"`
+	City                      string   `json:"city"`
+	District                  string   `json:"district"`
+	Address                   string   `json:"address"`
+	Phone                     string   `json:"phone"`
+	Fax                       string   `json:"fax"`
+	IsAbroad                  bool     `json:"is_abroad"`
+	TermDays                  int      `json:"term_days"`
+	SharingsCount             int      `json:"sharings_count"`
+	IBANS                     []string `json:"ibans"`
+	ExchangeRateType          string   `json:"exchange_rate_type"`
+	IBAN                      string   `json:"iban"`
+	SharingPreviewURL         string   `json:"sharing_preview_url"`
+	PaymentReminderPreviewURL string   `json:"payment_reminder_preview_url"`
 }
 
-// ContactPortalData ...
-type ContactPortalData struct{}
+// Relationships ...
+type Relationships map[string]*Relationship
 
-// CategoryRelationship ...
-type CategoryRelationship struct {
-	Data CategoryData `json:"data,omitempty"`
+// Relationship interface{} çünkü, struct veya slice olabiliyor
+type Relationship struct {
+	Data interface{} `json:"data"`
 }
 
-// ContactPortalRelationship ...
-type ContactPortalRelationship struct {
-	Data ContactPortalData `json:"data,omitempty"`
+// RelationshipData 1:1 ilişki tipi için
+type RelationshipData struct {
+	ID   string `json:"id"`
+	Type string `json:"type"`
 }
 
-// ContactPeopleRelationship ...
-type ContactPeopleRelationship struct {
-	Data []ContactPeopleData `json:"data,omitempty"`
+// RelationshipDataList 1:m ilişki tipi için
+type RelationshipDataList []*RelationshipData
+
+// contactCreate ... private kullanılacak complex create modeli
+type contactCreate struct {
+	Data          *ContactData   `json:"data"`
+	Relationships *Relationships `json:"relationships"`
 }
 
-// ParentCategoryRelationship ...
-type ParentCategoryRelationship struct {
-	Data ParentCategoryData `json:"data,omitempty"`
+// contactUpdate ... private kullanılacak complex update modeli
+type contactUpdate struct {
+	Data *ContactData `json:"data"`
 }
 
-// SubcategoryRelationship ...
-type SubcategoryRelationship struct {
-	Data SubcategoryData `json:"data,omitempty"`
+// contactListParams ... private kullanılacak complex listing modeli
+type contactListParams struct {
+	Filter  *ContactListFilter `url:"filter,omitempty"`
+	Sort    string             `url:"sort,omitempty"`
+	Page    *PageOptions       `url:"page,omitempty"`
+	Include string             `url:"include,omitempty"`
 }
 
-// ContactListOptions ...
-type ContactListOptions struct {
-	Filter  ContactFilterOptions `url:"filter,omitempty"`
-	Sort    string               `url:"sort,omitempty"`
-	Page    PageOptions          `url:"page,omitempty"`
-	Include string               `url:"include,omitempty"`
-}
-
-// ContactFilterOptions ...
-type ContactFilterOptions struct {
+// ContactListFilter ... export edilen, dışarıdan istek yaparken kullanılacak listing modeli
+type ContactListFilter struct {
 	Name      string `url:"name,omitempty"`
 	Email     string `url:"email,omitempty"`
 	TaxNumber string `url:"tax_number,omitempty"`
@@ -140,33 +85,75 @@ type ContactFilterOptions struct {
 	City      string `url:"city,omitempty"`
 }
 
-// ContactCreateRequest ...
-type ContactCreateRequest struct {
-	Data ContactData `json:"data,omitempty"`
-}
-
-// ContactUpdateRequest ...
-type ContactUpdateRequest struct {
-	Data ContactData `json:"data,omitempty"`
-}
-
-// ContactShowRequest ...
-type ContactShowRequest struct {
-	Data     ContactData `json:"data,omitempty"`
-	Included []Included  `json:"included,omitempty"`
+// ContactListOptions ... export edilen, dışarıdan istek yaparken kullanılacak listing modeli
+type ContactListOptions struct {
+	Sort       string `json:"sort,omitempty"`
+	PageNumber int    `json:"page_number,omitempty"`
+	PageSize   int    `json:"page_size,omitempty"`
+	Include    string `json:"include,omitempty"`
 }
 
 // ContactResponse ...
 type ContactResponse struct {
-	Data     ContactData `json:"data,omitempty"`
-	Included []Included  `json:"included,omitempty"`
-	Meta     Meta        `json:"meta,omitempty"`
+	Data     *ContactData `json:"data"`
+	Included []*Included  `json:"included"`
 }
 
 // ContactsResponse ...
 type ContactsResponse struct {
-	Data     []ContactData `json:"data,omitempty"`
-	Included []Included    `json:"included,omitempty"`
-	Links    struct{}      `json:"links,omitempty"`
-	Meta     Meta          `json:"meta,omitempty"`
+	Data     []*ContactData `json:"data"`
+	Included []*Included    `json:"included"`
+	Meta     Meta           `json:"meta"`
 }
+
+// Contact Person
+
+// ContactPersonData ...
+type ContactPersonData struct {
+	ID         string         `json:"id"`
+	Type       string         `json:"type"`
+	Attributes *ContactPerson `json:"attributes"`
+}
+
+// ContactPerson ...
+type ContactPerson struct {
+	ID    string `json:"id"`
+	Name  string `json:"name"`
+	Email string `json:"email"`
+	Phone string `json:"phone"`
+	Notes string `json:"notes"`
+}
+
+// // Category
+
+// // Category ...
+// type Category struct {
+// 	FullPath     string `json:"full_path"`
+// 	CreatedAt    string `json:"created_at"`
+// 	UpdatedAt    string `json:"updated_at"`
+// 	Name         string `json:"name"`
+// 	BgColor      string `json:"bg_color"`
+// 	TextColor    string `json:"text_color"`
+// 	CategoryType string `json:"category_type"`
+// 	ParentID     int    `json:"parent_id"`
+// }
+
+// // CategoryData ...
+// type CategoryData struct {
+// 	ID            string        `json:"id"`
+// 	Type          string        `json:"type"`
+// 	Attributes    Category      `json:"attributes"`
+// 	Relationships Relationships `json:"relationships"`
+// }
+
+// // ParentCategoryData ...
+// type ParentCategoryData struct {
+// 	ID   string `json:"id"`
+// 	Type string `json:"type"`
+// }
+
+// // SubcategoryData ...
+// type SubcategoryData struct {
+// 	ID   string `json:"id"`
+// 	Type string `json:"type"`
+// }

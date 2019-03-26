@@ -9,9 +9,19 @@ import (
 type ContactsService service
 
 // List ...
-func (s *ContactsService) List(opts *ContactListOptions) (*ContactsResponse, *http.Response, error) {
+func (s *ContactsService) List(filter *ContactListFilter, opts *ContactListOptions) (*ContactsResponse, *http.Response, error) {
 
-	url, err := addOptions("contacts", opts)
+	params := contactListParams{
+		Filter: filter,
+		Sort:   opts.Sort,
+		Page: &PageOptions{
+			Number: opts.PageNumber,
+			Size:   opts.PageSize,
+		},
+		Include: opts.Include,
+	}
+
+	url, err := addOptions("contacts", params)
 
 	if err != nil {
 		return nil, nil, err
@@ -34,11 +44,18 @@ func (s *ContactsService) List(opts *ContactListOptions) (*ContactsResponse, *ht
 }
 
 // Get ...
-func (s *ContactsService) Get(id int, opts *ContactListOptions) (*ContactResponse, *http.Response, error) {
+func (s *ContactsService) Get(id int, filter *ContactListFilter) (*ContactResponse, *http.Response, error) {
+
+	obj := contactListParams{
+		Filter:  filter,
+		Sort:    "",
+		Page:    &PageOptions{},
+		Include: "",
+	}
 
 	url := fmt.Sprintf("contacts/%d", id)
 
-	url, err := addOptions(url, opts)
+	url, err := addOptions(url, obj)
 
 	if err != nil {
 		return nil, nil, err
@@ -62,11 +79,33 @@ func (s *ContactsService) Get(id int, opts *ContactListOptions) (*ContactRespons
 }
 
 // Create ...
-func (s *ContactsService) Create(ccr *ContactCreateRequest) (*ContactResponse, *http.Response, error) {
+func (s *ContactsService) Create(c *Contact, cp []*ContactPerson) (*ContactResponse, *http.Response, error) {
+
+	var contactPeopleData []ContactPersonData
+
+	for _, attributes := range cp {
+		tmp := ContactPersonData{
+			Type:       "contact_people",
+			Attributes: attributes,
+		}
+		contactPeopleData = append(contactPeopleData, tmp)
+	}
+
+	obj := contactCreate{
+		Data: &ContactData{
+			Type:       "contacts",
+			Attributes: c,
+			Relationships: &Relationships{
+				"contact_people": &Relationship{
+					Data: contactPeopleData,
+				},
+			},
+		},
+	}
 
 	url := "contacts"
 
-	req, err := s.client.NewRequest("POST", url, ccr)
+	req, err := s.client.NewRequest("POST", url, obj)
 
 	if err != nil {
 		return nil, nil, err
@@ -84,11 +123,41 @@ func (s *ContactsService) Create(ccr *ContactCreateRequest) (*ContactResponse, *
 }
 
 // Update ...
-func (s *ContactsService) Update(id int, cur *ContactUpdateRequest) (*ContactResponse, *http.Response, error) {
+func (s *ContactsService) Update(id int, c *Contact, cp []*ContactPerson) (*ContactResponse, *http.Response, error) {
+
+	var contactPeopleData []ContactPersonData
+
+	for _, attributes := range cp {
+
+		tmp := ContactPersonData{
+			ID:   attributes.ID,
+			Type: "contact_people",
+			Attributes: &ContactPerson{
+				Name:  attributes.Name,
+				Email: attributes.Email,
+				Phone: attributes.Phone,
+				Notes: attributes.Notes,
+			},
+		}
+
+		contactPeopleData = append(contactPeopleData, tmp)
+	}
+
+	obj := contactUpdate{
+		Data: &ContactData{
+			Type:       "contacts",
+			Attributes: c,
+			Relationships: &Relationships{
+				"contact_people": &Relationship{
+					Data: contactPeopleData,
+				},
+			},
+		},
+	}
 
 	url := fmt.Sprintf("contacts/%d", id)
 
-	req, err := s.client.NewRequest("PUT", url, cur)
+	req, err := s.client.NewRequest("PUT", url, obj)
 
 	if err != nil {
 		return nil, nil, err
@@ -106,23 +175,21 @@ func (s *ContactsService) Update(id int, cur *ContactUpdateRequest) (*ContactRes
 }
 
 // Delete ...
-func (s *ContactsService) Delete(id int) (*ContactResponse, *http.Response, error) {
+func (s *ContactsService) Delete(id int) (*http.Response, error) {
 
 	url := fmt.Sprintf("contacts/%d", id)
 
 	req, err := s.client.NewRequest("DELETE", url, nil)
 
 	if err != nil {
-		return nil, nil, err
+		return nil, err
 	}
 
-	cdr := &ContactResponse{}
-
-	resp, err := s.client.Do(req, cdr)
+	resp, err := s.client.Do(req, nil)
 
 	if err != nil {
-		return nil, nil, err
+		return nil, err
 	}
 
-	return cdr, resp, nil
+	return resp, nil
 }

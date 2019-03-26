@@ -171,18 +171,21 @@ func (c *Client) Do(req *http.Request, v interface{}) (*http.Response, error) {
 		return nil, err
 	}
 
-	body, err := ioutil.ReadAll(resp.Body)
+	if v != nil {
 
-	if err != nil {
-		return nil, err
-	}
+		body, err := ioutil.ReadAll(resp.Body)
 
-	fmt.Println("body:", string(body))
+		if err != nil {
+			return nil, err
+		}
 
-	err = json.Unmarshal(body, v)
+		fmt.Println("body:", string(body))
 
-	if err != nil {
-		return nil, err
+		err = json.Unmarshal(body, v)
+
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	return resp, nil
