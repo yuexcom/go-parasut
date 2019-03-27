@@ -44,18 +44,15 @@ func (s *ContactsService) List(filter *ContactListFilter, opts *ContactListOptio
 }
 
 // Get ...
-func (s *ContactsService) Get(id int, filter *ContactListFilter) (*ContactResponse, *http.Response, error) {
+func (s *ContactsService) Get(id int, opts *ContactListOptions) (*ContactResponse, *http.Response, error) {
 
-	obj := contactListParams{
-		Filter:  filter,
-		Sort:    "",
-		Page:    &PageOptions{},
-		Include: "",
+	params := contactListParams{
+		Include: opts.Include,
 	}
 
 	url := fmt.Sprintf("contacts/%d", id)
 
-	url, err := addOptions(url, obj)
+	url, err := addOptions(url, params)
 
 	if err != nil {
 		return nil, nil, err
@@ -79,29 +76,9 @@ func (s *ContactsService) Get(id int, filter *ContactListFilter) (*ContactRespon
 }
 
 // Create ...
-func (s *ContactsService) Create(c *Contact, cp []*ContactPerson) (*ContactResponse, *http.Response, error) {
+func (s *ContactsService) Create(c *Contact) (*ContactResponse, *http.Response, error) {
 
-	var contactPeopleData []ContactPersonData
-
-	for _, attributes := range cp {
-		tmp := ContactPersonData{
-			Type:       "contact_people",
-			Attributes: attributes,
-		}
-		contactPeopleData = append(contactPeopleData, tmp)
-	}
-
-	obj := contactCreate{
-		Data: &ContactData{
-			Type:       "contacts",
-			Attributes: c,
-			Relationships: &Relationships{
-				"contact_people": &Relationship{
-					Data: contactPeopleData,
-				},
-			},
-		},
-	}
+	obj := s.prepareObj(c)
 
 	url := "contacts"
 
@@ -123,37 +100,9 @@ func (s *ContactsService) Create(c *Contact, cp []*ContactPerson) (*ContactRespo
 }
 
 // Update ...
-func (s *ContactsService) Update(id int, c *Contact, cp []*ContactPerson) (*ContactResponse, *http.Response, error) {
+func (s *ContactsService) Update(id int, c *Contact) (*ContactResponse, *http.Response, error) {
 
-	var contactPeopleData []ContactPersonData
-
-	for _, attributes := range cp {
-
-		tmp := ContactPersonData{
-			ID:   attributes.ID,
-			Type: "contact_people",
-			Attributes: &ContactPerson{
-				Name:  attributes.Name,
-				Email: attributes.Email,
-				Phone: attributes.Phone,
-				Notes: attributes.Notes,
-			},
-		}
-
-		contactPeopleData = append(contactPeopleData, tmp)
-	}
-
-	obj := contactUpdate{
-		Data: &ContactData{
-			Type:       "contacts",
-			Attributes: c,
-			Relationships: &Relationships{
-				"contact_people": &Relationship{
-					Data: contactPeopleData,
-				},
-			},
-		},
-	}
+	obj := s.prepareObj(c)
 
 	url := fmt.Sprintf("contacts/%d", id)
 
@@ -192,4 +141,55 @@ func (s *ContactsService) Delete(id int) (*http.Response, error) {
 	}
 
 	return resp, nil
+}
+
+func (s *ContactsService) prepareObj(c *Contact) *contactRequest {
+
+	var contactPeopleData []*contactPersonData
+
+	for _, cp := range c.ContactPeople {
+		tmp := &contactPersonData{
+			ID:   cp.ID,
+			Type: "contact_people",
+			Attributes: &contactPerson{
+				Name:  cp.Name,
+				Email: cp.Email,
+				Phone: cp.Phone,
+				Notes: cp.Notes,
+			},
+		}
+		contactPeopleData = append(contactPeopleData, tmp)
+	}
+
+	obj := &contactRequest{
+		Data: &contactData{
+			Type: "contacts",
+			Attributes: &contact{
+				Name:        c.Name,
+				AccountType: c.AccountType,
+				ContactType: c.ContactType,
+				Email:       c.Email,
+				ShortName:   c.ShortName,
+				TaxNumber:   c.TaxNumber,
+				TaxOffice:   c.TaxOffice,
+				City:        c.City,
+				District:    c.District,
+				Address:     c.Address,
+				Phone:       c.Phone,
+			},
+			Relationships: &relationships{
+				"contact_people": &relationship{
+					Data: contactPeopleData,
+				},
+				"category": &relationship{
+					Data: categoryData{
+						ID:   c.CategoryID,
+						Type: "item_categories",
+					},
+				},
+			},
+		},
+	}
+
+	return obj
 }
