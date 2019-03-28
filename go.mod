@@ -1,4 +1,4 @@
-module go-parasut
+module github.com/yuexcom/go-parasut
 
 go 1.12
 

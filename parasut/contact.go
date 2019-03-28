@@ -9,7 +9,7 @@ import (
 type ContactsService service
 
 // List ...
-func (s *ContactsService) List(opts *ListOptions) (*ContactListResponse, *http.Response, error) {
+func (s *ContactsService) List(opts *ContactListOptions) (*ContactsResponse, *http.Response, error) {
 
 	url, err := addOptions("contacts", opts)
 
@@ -22,7 +22,7 @@ func (s *ContactsService) List(opts *ListOptions) (*ContactListResponse, *http.R
 		return nil, nil, err
 	}
 
-	clr := &ContactListResponse{}
+	clr := &ContactsResponse{}
 
 	resp, err := s.client.Do(req, &clr)
 
@@ -34,9 +34,15 @@ func (s *ContactsService) List(opts *ListOptions) (*ContactListResponse, *http.R
 }
 
 // Get ...
-func (s *ContactsService) Get(id int) (*ContactResponse, *http.Response, error) {
+func (s *ContactsService) Get(id string, opts *ContactGetOptions) (*ContactResponse, *http.Response, error) {
 
-	url := fmt.Sprintf("contacts/%d", id)
+	url := fmt.Sprintf("contacts/%s", id)
+
+	url, err := addOptions(url, opts)
+
+	if err != nil {
+		return nil, nil, err
+	}
 
 	req, err := s.client.NewRequest("GET", url, nil)
 
@@ -56,11 +62,11 @@ func (s *ContactsService) Get(id int) (*ContactResponse, *http.Response, error) 
 }
 
 // Create ...
-func (s *ContactsService) Create(ccr *ContactCreateRequest) (*ContactResponse, *http.Response, error) {
+func (s *ContactsService) Create(c *ContactRequest) (*ContactResponse, *http.Response, error) {
 
 	url := "contacts"
 
-	req, err := s.client.NewRequest("POST", url, ccr)
+	req, err := s.client.NewRequest("POST", url, c)
 
 	if err != nil {
 		return nil, nil, err
@@ -78,11 +84,11 @@ func (s *ContactsService) Create(ccr *ContactCreateRequest) (*ContactResponse, *
 }
 
 // Update ...
-func (s *ContactsService) Update(id int, cur *ContactUpdateRequest) (*ContactResponse, *http.Response, error) {
+func (s *ContactsService) Update(id string, c *ContactRequest) (*ContactResponse, *http.Response, error) {
 
-	url := fmt.Sprintf("contacts/%d", id)
+	url := fmt.Sprintf("contacts/%s", id)
 
-	req, err := s.client.NewRequest("PUT", url, cur)
+	req, err := s.client.NewRequest("PUT", url, c)
 
 	if err != nil {
 		return nil, nil, err
@@ -100,23 +106,21 @@ func (s *ContactsService) Update(id int, cur *ContactUpdateRequest) (*ContactRes
 }
 
 // Delete ...
-func (s *ContactsService) Delete(id int) (*ContactDeleteResponse, *http.Response, error) {
+func (s *ContactsService) Delete(id string) (*http.Response, error) {
 
-	url := fmt.Sprintf("contacts/%d", id)
+	url := fmt.Sprintf("contacts/%s", id)
 
 	req, err := s.client.NewRequest("DELETE", url, nil)
 
 	if err != nil {
-		return nil, nil, err
+		return nil, err
 	}
 
-	cdr := &ContactDeleteResponse{}
-
-	resp, err := s.client.Do(req, cdr)
+	resp, err := s.client.Do(req, nil)
 
 	if err != nil {
-		return nil, nil, err
+		return nil, err
 	}
 
-	return cdr, resp, nil
+	return resp, nil
 }

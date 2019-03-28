@@ -9,7 +9,7 @@ import (
 type SalesInvoicesService service
 
 // List ...
-func (s *SalesInvoicesService) List(opts *ListOptions) (*SalesInvoiceListResponse, *http.Response, error) {
+func (s *SalesInvoicesService) List(opts *SalesInvoiceListOptions) (*SalesInvoicesResponse, *http.Response, error) {
 
 	url, err := addOptions("sales_invoices", opts)
 
@@ -23,7 +23,7 @@ func (s *SalesInvoicesService) List(opts *ListOptions) (*SalesInvoiceListRespons
 		return nil, nil, err
 	}
 
-	silr := &SalesInvoiceListResponse{}
+	silr := &SalesInvoicesResponse{}
 
 	resp, err := s.client.Do(req, silr)
 
@@ -35,9 +35,15 @@ func (s *SalesInvoicesService) List(opts *ListOptions) (*SalesInvoiceListRespons
 }
 
 // Get ...
-func (s *SalesInvoicesService) Get(id int) (*SalesInvoiceResponse, *http.Response, error) {
+func (s *SalesInvoicesService) Get(id string, opts *SalesInvoiceGetOptions) (*SalesInvoiceResponse, *http.Response, error) {
 
-	url := fmt.Sprintf("sales_invoices/%d", id)
+	url := fmt.Sprintf("sales_invoices/%s", id)
+
+	url, err := addOptions(url, opts)
+
+	if err != nil {
+		return nil, nil, err
+	}
 
 	req, err := s.client.NewRequest("GET", url, nil)
 
@@ -57,11 +63,11 @@ func (s *SalesInvoicesService) Get(id int) (*SalesInvoiceResponse, *http.Respons
 }
 
 // Create ...
-func (s *SalesInvoicesService) Create(ccr *SalesInvoiceCreateRequest) (*SalesInvoiceResponse, *http.Response, error) {
+func (s *SalesInvoicesService) Create(si *SalesInvoiceRequest) (*SalesInvoiceResponse, *http.Response, error) {
 
 	url := "sales_invoices"
 
-	req, err := s.client.NewRequest("POST", url, ccr)
+	req, err := s.client.NewRequest("POST", url, si)
 
 	if err != nil {
 		return nil, nil, err
@@ -79,11 +85,11 @@ func (s *SalesInvoicesService) Create(ccr *SalesInvoiceCreateRequest) (*SalesInv
 }
 
 // Update ...
-func (s *SalesInvoicesService) Update(id int, cur *SalesInvoiceUpdateRequest) (*SalesInvoiceResponse, *http.Response, error) {
+func (s *SalesInvoicesService) Update(id string, si *SalesInvoiceRequest) (*SalesInvoiceResponse, *http.Response, error) {
 
-	url := fmt.Sprintf("sales_invoices/%d", id)
+	url := fmt.Sprintf("sales_invoices/%s", id)
 
-	req, err := s.client.NewRequest("PUT", url, cur)
+	req, err := s.client.NewRequest("PUT", url, si)
 
 	if err != nil {
 		return nil, nil, err
@@ -101,23 +107,21 @@ func (s *SalesInvoicesService) Update(id int, cur *SalesInvoiceUpdateRequest) (*
 }
 
 // Delete ...
-func (s *SalesInvoicesService) Delete(id int) (*SalesInvoiceDeleteResponse, *http.Response, error) {
+func (s *SalesInvoicesService) Delete(id string) (*http.Response, error) {
 
-	url := fmt.Sprintf("sales_invoices/%d", id)
+	url := fmt.Sprintf("sales_invoices/%s", id)
 
 	req, err := s.client.NewRequest("DELETE", url, nil)
 
 	if err != nil {
-		return nil, nil, err
+		return nil, err
 	}
 
-	sidr := &SalesInvoiceDeleteResponse{}
-
-	resp, err := s.client.Do(req, sidr)
+	resp, err := s.client.Do(req, nil)
 
 	if err != nil {
-		return nil, nil, err
+		return nil, err
 	}
 
-	return sidr, resp, nil
+	return resp, nil
 }

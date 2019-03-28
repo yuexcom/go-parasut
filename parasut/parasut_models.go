@@ -5,22 +5,22 @@ import (
 	"net/http"
 )
 
-// relationships ...
-type relationships map[string]*relationship
+// Relationships ...
+type Relationships map[string]*Relationship
 
-// relationship interface{} çünkü, struct veya slice olabiliyor
-type relationship struct {
+// Relationship interface{} çünkü, struct veya slice olabiliyor
+type Relationship struct {
 	Data interface{} `json:"data"`
 }
 
-// relationshipData 1:1 ilişki tipi için
-type relationshipData struct {
+// RelationshipData 1:1 ilişki tipi için
+type RelationshipData struct {
 	ID   string `json:"id"`
 	Type string `json:"type"`
 }
 
-// relationshipDataList 1:m ilişki tipi için
-type relationshipDataList []*relationshipData
+// RelationshipDataList 1:m ilişki tipi için
+type RelationshipDataList []*RelationshipData
 
 // -- //
 
@@ -30,12 +30,12 @@ type PageOptions struct {
 	Size   int `url:"size,omitempty"`
 }
 
-// included ...
-type included struct {
+// Included ...
+type Included struct {
 	ID            string        `json:"id"`
 	Type          string        `json:"type"`
 	Attributes    interface{}   `json:"attributes"`
-	Relationships relationships `json:"relationships"`
+	Relationships Relationships `json:"Relationships"`
 }
 
 // Meta ...
@@ -103,36 +103,3 @@ type EDocumentStatusResponseError struct {
 func (r *EDocumentStatusResponseError) Error() string {
 	return fmt.Sprintf("%+v [Fatura: #%s]", r.Errors, r.SalesInvoiceID)
 }
-
-// // RelationshipList ...
-// type RelationshipList struct {
-// 	Category        Relationship  `json:"category"`
-// 	ContactPortal   Relationship  `json:"contact_portal"`
-// 	ContactPeople   Relationships `json:"contact_people"`
-// 	PriceList       Relationship  `json:"price_list"`
-// 	Activities      Relationships `json:"activities"`
-// 	EInvoiceInboxes Relationships `json:"e_invoice_inboxes"`
-// 	Sharings        Relationships `json:"sharings"`
-// }
-
-// // Relationship ...
-// type Relationship struct {
-// 	Data RelationshipData `json:"data"`
-// }
-
-// // Relationships ...
-// type Relationships struct {
-// 	Data []RelationshipData `json:"data"`
-// }
-
-// // RelationshipData ...
-// type RelationshipData struct {
-// 	ID   string `json:"id"`
-// 	Type string `json:"type"`
-// }
-
-// // DataMeta ...
-// type DataMeta struct {
-// 	CreatedAt string `json:"created_at"`
-// 	UpdatedAt string `json:"updated_at"`
-// }

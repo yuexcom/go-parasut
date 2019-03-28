@@ -1,15 +1,15 @@
 package parasut
 
-// contactData ...
-type contactData struct {
+// ContactData ...
+type ContactData struct {
 	ID            string         `json:"id,omitempty"`
 	Type          string         `json:"type,omitempty"` // contacts
-	Attributes    *contact       `json:"attributes,omitempty"`
-	Relationships *relationships `json:"relationships,omitempty"`
+	Attributes    *Contact       `json:"attributes,omitempty"`
+	Relationships *Relationships `json:"relationships,omitempty"`
 }
 
-// contact ...
-type contact struct {
+// Contact ...
+type Contact struct {
 	CreatedAt                 string   `json:"created_at,omitempty"`
 	UpdatedAt                 string   `json:"updated_at,omitempty"`
 	ContactType               string   `json:"contact_type,omitempty"` // "person", "company"
@@ -40,35 +40,40 @@ type contact struct {
 	PaymentReminderPreviewURL string   `json:"payment_reminder_preview_url,omitempty"`
 }
 
-// contactRequest ... private kullanılacak complex create modeli
-type contactRequest struct {
-	Data *contactData `json:"data,omitempty"`
+// ContactRequest ... private kullanılacak complex create modeli
+type ContactRequest struct {
+	Data *ContactData `json:"data,omitempty"`
 }
 
-// contactListParams ... private kullanılacak complex listing modeli
-type contactListParams struct {
-	Filter  *ContactListFilter `url:"filter,omitempty"`
-	Sort    string             `url:"sort,omitempty"` // "id", "balance", "name", "email"
-	Page    *PageOptions       `url:"page,omitempty"`
-	Include string             `url:"include,omitempty"` // "category", "contact_portal", "contact_people"
-}
-
-// contactPersonData ...
-type contactPersonData struct {
+// ContactPersonData ...
+type ContactPersonData struct {
 	ID         string         `json:"id,omitempty"`
 	Type       string         `json:"type,omitempty"`
-	Attributes *contactPerson `json:"attributes,omitempty"`
+	Attributes *ContactPerson `json:"attributes,omitempty"`
 }
 
-// contactPerson ...
-type contactPerson struct {
+// ContactPerson ...
+type ContactPerson struct {
 	Name  string `json:"name,osmitempty"`
 	Email string `json:"email,omitempty"`
 	Phone string `json:"phone,omitempty"`
 	Notes string `json:"notes,omitempty"`
 }
 
-// ContactListFilter ... export edilen, dışarıdan istek yaparken kullanılacak listing modeli
+// ContactListOptions ...
+type ContactListOptions struct {
+	Filter  *ContactListFilter `url:"filter,omitempty"`
+	Sort    string             `url:"sort,omitempty"`
+	Page    *PageOptions       `url:"page,omitempty"`
+	Include string             `url:"include,omitempty"`
+}
+
+// ContactGetOptions ...
+type ContactGetOptions struct {
+	Include string `url:"include,omitempty"`
+}
+
+// ContactListFilter ...
 type ContactListFilter struct {
 	Name      string `url:"name,omitempty"`
 	Email     string `url:"email,omitempty"`
@@ -77,49 +82,15 @@ type ContactListFilter struct {
 	City      string `url:"city,omitempty"`
 }
 
-// ContactListOptions ... export edilen, dışarıdan istek yaparken kullanılacak listing modeli
-type ContactListOptions struct {
-	Sort       string `json:"sort,omitempty"`
-	PageNumber int    `json:"page_number,omitempty"`
-	PageSize   int    `json:"page_size,omitempty"`
-	Include    string `json:"include,omitempty"`
-}
-
-// Contact ...
-type Contact struct {
-	Name          string           `json:"name,omitempty"`         // required
-	AccountType   string           `json:"account_type,omitempty"` // required, "customer", "supplier"
-	ContactType   string           `json:"contact_type,omitempty"`
-	Email         string           `json:"email,omitempty"`
-	ShortName     string           `json:"short_name,omitempty"`
-	TaxNumber     string           `json:"tax_number,omitempty"`
-	TaxOffice     string           `json:"tax_office,omitempty"`
-	City          string           `json:"city,omitempty"`
-	District      string           `json:"district,omitempty"`
-	Address       string           `json:"address,omitempty"`
-	Phone         string           `json:"phone,omitempty"`
-	CategoryID    string           `json:"category_id,omitempty"`
-	ContactPeople []*ContactPerson `json:"contact_people,omitempty"`
-}
-
-// ContactPerson ...
-type ContactPerson struct {
-	ID    string `json:"id,omitempty"`
-	Name  string `json:"name,omitempty"`
-	Email string `json:"email,omitempty"`
-	Phone string `json:"phone,omitempty"`
-	Notes string `json:"notes,omitempty"`
-}
-
 // ContactResponse ...
 type ContactResponse struct {
-	Data     *contactData `json:"data,omitempty"`
-	Included []*included  `json:"included,omitempty"`
+	Data     *ContactData `json:"data,omitempty"`
+	Included []*Included  `json:"included,omitempty"`
 }
 
 // ContactsResponse ...
 type ContactsResponse struct {
-	Data     []*contactData `json:"data,omitempty"`
-	Included []*included    `json:"included,omitempty"`
+	Data     []*ContactData `json:"data,omitempty"`
+	Included []*Included    `json:"included,omitempty"`
 	Meta     Meta           `json:"meta,omitempty"`
 }

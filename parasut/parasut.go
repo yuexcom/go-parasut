@@ -2,6 +2,7 @@ package parasut
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -16,16 +17,16 @@ import (
 )
 
 const (
-	tokenURL = "https://api.parasut.com/oauth/token"
 	authURL  = "https://api.parasut.com/oauth/authorize"
-	baseURL  = "https://api.parasut.com/v1"
+	tokenURL = "https://api.parasut.com/oauth/token"
+	baseURL  = "https://api.parasut.com/v4"
 )
 
 type service struct {
 	client *Client
 }
 
-// Client yeni bir paraşüt client'ı oluşturur
+// Client ...
 type Client struct {
 	client  *http.Client
 	baseURL *url.URL
@@ -38,7 +39,7 @@ type Client struct {
 	companyID string
 }
 
-// GetAuthHTTPClient bir http client'ı auth edip get eder
+// GetAuthHTTPClient ...
 func GetAuthHTTPClient(clientID, clientSecret, username, password string) (*http.Client, error) {
 
 	cfg := oauth2.Config{
@@ -60,6 +61,14 @@ func GetAuthHTTPClient(clientID, clientSecret, username, password string) (*http
 	}
 
 	return cfg.Client(oauth2.NoContext, token), nil
+}
+
+// GetHTTPClientWithToken ...
+func GetHTTPClientWithToken(token string) *http.Client {
+
+	return oauth2.NewClient(context.Background(), oauth2.StaticTokenSource(
+		&oauth2.Token{AccessToken: token},
+	))
 }
 
 // NewClient ...
@@ -169,16 +178,19 @@ func (c *Client) Do(req *http.Request, v interface{}) (*http.Response, error) {
 		return nil, err
 	}
 
-	body, err := ioutil.ReadAll(resp.Body)
+	if v != nil {
 
-	if err != nil {
-		return nil, err
-	}
+		body, err := ioutil.ReadAll(resp.Body)
 
-	err = json.Unmarshal(body, v)
+		if err != nil {
+			return nil, err
+		}
 
-	if err != nil {
-		return nil, err
+		err = json.Unmarshal(body, v)
+
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	return resp, nil
@@ -186,13 +198,13 @@ func (c *Client) Do(req *http.Request, v interface{}) (*http.Response, error) {
 
 func checkResponse(resp *http.Response) error {
 
-	if resp.StatusCode == http.StatusOK {
+	if resp.StatusCode >= 200 && resp.StatusCode <= 299 {
 		return nil
 	}
 
-	data, err := ioutil.ReadAll(resp.Body)
-
 	errorResponse := &ResponseError{}
+
+	data, err := ioutil.ReadAll(resp.Body)
 
 	if err == nil && data != nil {
 		json.Unmarshal(data, errorResponse)
