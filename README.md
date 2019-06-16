@@ -5,7 +5,7 @@
 
 go-parasut is a Go client library for accessing the [Paraşüt API v1](https://api.parasut.com/docs).
 
-go-parasut requires Go version 1.9 or greater.
+go-parasut requires Go version 1.11 or greater.
 
 ## Installation
 
