@@ -10,7 +10,7 @@ go-parasut requires Go version 1.9 or greater.
 ## Installation
 
 ```bash
-$ go get github.com/yuexcom/go-parasut/v1
+$ go get github.com/yuexcom/go-parasut
 ```
 
 ## License
